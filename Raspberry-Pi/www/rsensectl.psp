@@ -1,0 +1,553 @@
+<!--
+/**
+ * rSense
+ * Copyright (c) 2014 Yukihiro Nomura All rights reserved.
+ * rsensesystems@gmail.com
+ *
+ * rSense is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * rSense is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rSense.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * 2015/01/09
+ */
+-->
+
+<html>
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<head>
+	<meta charset="utf-8">
+	<title>rSense Controll Panel</title>
+	<link href="css/ui-lightness/jquery-ui-1.10.4.css" rel="stylesheet">
+	<script src="js/jquery-1.10.2.js"></script>
+	<script src="js/jquery-ui-1.10.4.js"></script>
+	<script>
+	$(function() {
+		
+		$( "#slider" ).slider({
+	  		value:145,
+          		min:0,
+          		max:999,
+          		step:5,
+          		range:"min",
+			slide: function(event, ui) {
+                        $('#num').val(ui.value);
+                          }
+		});
+			$('#num').bind("blur keyup change",function(){
+        		$("#slider").slider("value",$("#num").val());
+    			});
+    			$('#num').val($('#slider').slider('value'));
+
+		$( "#slider2" ).slider({
+	  		value:6,
+          		min:0,
+          		max:40,
+          		step:1,
+          		range:"min",
+			slide: function(event, ui) {
+                        $('#num2').val(ui.value);
+                          }
+		});
+			$('#num2').bind("blur keyup change",function(){
+        		$("#slider2").slider("value",$("#num2").val());
+    			});
+    			$('#num2').val($('#slider2').slider('value'));
+
+
+		$( "#slider3" ).slider({
+	  		value:6,
+          		min:0,
+          		max:40,
+          		step:1,
+          		range:"min",
+			slide: function(event, ui) {
+                        $('#num3').val(ui.value);
+                          }
+		});
+			$('#num3').bind("blur keyup change",function(){
+        		$("#slider3").slider("value",$("#num3").val());
+    			});
+    			$('#num3').val($('#slider3').slider('value'));
+
+
+		$( "#slider4" ).slider({
+	  		value:15,
+          		min:0,
+          		max:100,
+          		step:1,
+          		range:"min",
+			slide: function(event, ui) {
+                        $('#num4').val(ui.value);
+                          }
+		});
+			$('#num4').bind("blur keyup change",function(){
+        		$("#slider4").slider("value",$("#num4").val());
+    			});
+    			$('#num4').val($('#slider4').slider('value'));
+
+		$( "#slider5" ).slider({
+	  		value:180,
+          		min:0,
+          		max:1200,
+          		step:10,
+          		range:"min",
+			slide: function(event, ui) {
+                        $('#num5').val(ui.value);
+                          }
+		});
+			$('#num5').bind("blur keyup change",function(){
+        		$("#slider5").slider("value",$("#num5").val());
+    			});
+    			$('#num5').val($('#slider5').slider('value'));
+
+		$( "#slider6" ).slider({
+	  		value:180,
+          		min:0,
+          		max:1200,
+          		step:10,
+          		range:"min",
+			slide: function(event, ui) {
+                        $('#num6').val(ui.value);
+                          }
+		});
+			$('#num6').bind("blur keyup change",function(){
+        		$("#slider6").slider("value",$("#num6").val());
+    			});
+    			$('#num6').val($('#slider6').slider('value'));
+
+	});
+	</script> 
+
+<%
+import time
+import sqlite3
+import os
+import unitlst
+
+sqlitedb = "/var/db/mydb.db"
+
+# Set actuator's name and port number here
+actudict = {0002:"ヒーター2", 0004:"潅水チューブ",005:"巻き上げ機", 0006:"ヒーター", 0000:"設定しない"}
+
+
+con = sqlite3.connect(sqlitedb)
+con.row_factory = sqlite3.Row
+cur = con.cursor()
+cur.execute("select  MAX(regdate),myid,s1,sense1,actuate1,interval1,mode1,s2,sense2,actuate2,interval2,mode2,s3,sense3,actuate3,interval3,mode3,s4,sense4,actuate4,interval4,mode4,s5,sense5,actuate5,interval5,mode5 from ctltbl where myid='put_your_target_id_here')
+
+result = cur.fetchone()
+
+status1 = int(result[2])
+if status1 == 9999:
+	status1flag = '<font color=4169E1>開始中</font>'
+elif status1 == 8888:
+	status1flag = '<font color=red>停止中</font>'
+elif status1 == 7777:
+	status1flag = '自動'
+else:
+	status1flag = 'NA'
+
+wmoist = result[3].encode('utf-8')
+wmoistactu = result[4]
+wmoistinterval = int(result[5])
+mode1 = int(result[6])
+if mode1 == 1111:
+	mode1status = '以上'
+else:	
+	mode1status = '以下'
+
+status2 = int(result[7])
+if status2 == 9999:
+	status2flag = '<font color=green>巻上</font>'
+elif status2 == 8888:
+	status2flag = '<font color=008B8B>巻下</font>'
+elif status2 == 7777:
+	status2flag = '自動'
+else:
+	status1flag = 'NA'
+
+temp1 = result[8]
+temp1actu = result[9]
+temp1interval = int(result[10])
+mode2 = int(result[11])
+if mode2 == 1111:
+        mode2status = '以上'
+else:    
+        mode2status = '以下'
+
+status3 = int(result[12])
+if status3 == 9999:
+	status3flag = '<font color=green>開始中</font>'
+elif status3 == 8888:
+	status3flag = '<font color=red>停止中</font>'
+elif status3 == 7777:
+	status3flag = '自動'
+else:
+	status1flag = 'NA'
+
+temp2 = result[13].encode('utf-8')
+temp2actu = result[14]
+temp2interval = int(result[15])
+mode3 = int(result[16])
+if mode3 == 1111:
+        mode3status = '以上'
+else:    
+        mode3status = '以下'
+
+status4 = int(result[17])
+if status4 == 9999:
+	status4flag = '<font color=red>開始中</font>'
+elif status4 == 8888:
+	status4flag = '<font color=red>停止中</font>'
+elif status4 == 7777:
+	status4flag = '自動'
+else:
+	status1flag = 'NA'
+
+humed = result[18].encode('utf-8')
+humedactu = result[19]
+humedinterval = int(result[20])
+mode4 = int(result[21])
+if mode4 == 1111:
+        mode4status = '以上'
+else:    
+        mode4status = '以下'
+
+status5 = int(result[22])
+if status5 == 9999:
+	status5flag = '<font color=green>開始中</font>'
+elif status5 == 8888:
+	status5flag = '<font color=red>停止中</font>'
+elif status5 == 7777:
+	status5flag = '自動'
+else:
+	status1flag = 'NA'
+
+light = result[23].encode('utf-8')
+lightactu = result[24]
+lightinterval = int(result[25])
+mode5 = int(result[26])
+if mode5 == 1111:
+        mode5status = '以上'
+else:    
+        mode5status = '以下'
+
+result2 = cur.execute("select * from actuator").fetchall()
+
+actu = []
+for row in result2:
+	actu.append(row[1])
+
+
+cur.close()
+con.close()
+
+%>
+
+<p><br>
+<center>
+<table border=0 cellpadding=25 >
+<tr><td bgcolor=#ede6e4>
+<center>
+<h3>
+まかしたくん コントロールパネル<h3>
+<h2><strong>ベジチーム (C6）</strong></h2>
+</center>
+<table cellpadding=6 border=0 cellapacing=6>
+
+<!-------------------------------------------------------------------------------------- -->
+<tr>
+<td bgcolor=#808c8d align=center><font color=white>センサー</font></td>
+<td bgcolor=#808c8d colspan="4" align="center"><font color=white>現在の設定 </td>
+<td bgcolor=#808c8d  align="center"><font color=white>強制制御 </td>
+<td bgcolor=#808c8d colspan="2" align="center"><font color=white>しきい値設定</td>
+<td bgcolor=#808c8d align=center><font color=white size=3>アクチュエータ</font></td><td bgcolor=#808c8d></td>
+</tr>
+
+<!-------------------------------------------------------------------------------------- -->
+<form method="POST" action="/cgi-bin/forcectl.cgi">
+<tr>
+<td bgcolor=#d1d8de align=right><strong>水分量</strong></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c size=3><strong><%= wmoistinterval %></strong></font></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c size=2><strong><%= mode1status %></strong></font></td>
+<td bgcolor=lightyellow align="right"><font color=#354a5c size=2><strong><%= actudict[int('000' + wmoistactu)] %></strong></font></td>
+<td bgcolor=lightyellow align="center"><font color=blue size=2><strong><%= status1flag %></strong></font></td>
+<td bgcolor=#94ca7a align=center>
+
+<table border=0>
+<tr><td>
+<select name=action>
+<option value=start>開始</option>
+<option value=stop>停止</option>
+<option value=auto>自動</option>
+<input type="hidden" name="sensorid" value="wmoist">
+</select>
+</td>
+<td>
+<input type="submit" value="実行">
+</form>
+</td></tr>
+</table>
+
+</td>
+</form>
+
+<form method="POST" action="/cgi-bin/setvalues.cgi">
+<td bgcolor=#d1d8de width="110" ><div id='slider'></div></td>
+<td bgcolor=#d1d8de><input type="text" name="slide" value="300" id="num" size=4" />
+
+<select name="wmoistmode">
+<option value="1111">以上</option>
+<option value="2222">以下</option>
+</select>
+
+</td> <td bgcolor=#d1d8de align=center>
+<select name="wmoistactu">
+<option value="設定しない">設定しない</option>
+<%
+for row in actu:
+%>
+<option value= <%= row.encode('utf-8') %>><%= row.encode('utf-8') %> </option>
+<%
+%>
+</select>
+</td>
+<input type="hidden" name="sensorid" value="wmoist">
+<td bgcolor=#d1d8de><input type="submit" value="設定"></td>
+</tr>
+</form>
+
+<!-------------------------------------------------------------------------------------- -->
+<form method="POST" action="/cgi-bin/forcectl.cgi">
+<tr>
+<td bgcolor=#d1d8de align=right><strong>温度</strong></td>
+<td bgcolor=lightyellow align="right"><font color=#354a5c><strong><%= temp1interval %></strong></font></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c size=2><strong><%= mode2status %></strong></font></td>
+<td bgcolor=lightyellow align="right"><font color=#354a5c size=2><strong><%= actudict[int('000' + temp1actu)] %></strong></font></td>
+<td bgcolor=lightyellow align="center"><font color=blue size=2><strong><%= status2flag %></strong></font></td>
+<td bgcolor=#94ca7a align=center>
+
+<table border=0>
+<tr><td>
+<select name=action>
+<option value=start>巻上</option>
+<option value=stop>巻下</option>
+<option value=auto>自動</option>
+<input type="hidden" name="sensorid" value="temp1">
+</select>
+</td>
+<td>
+<input type="submit" value="実行">
+</form>
+</td></tr>
+</table>
+</td>
+
+<form method="POST" action="/cgi-bin/setvalues.cgi">
+<td bgcolor=d1d8de> <div id='slider2'></div></td>
+<td bgcolor=d1d8de><input type="text" name="slide2" value="" id="num2" size=4" />
+
+<select name="temp1mode">
+<option value="1111">固定</option>
+</select>
+
+</td><td bgcolor=d1d8de align=center>
+<select name="temp1actu">
+<option value="巻き上げ機">巻き上げ機</option>
+<%
+%>
+</select>
+</td>
+<input type="hidden" name="sensorid" value="temp1">
+ <td bgcolor=#d1d8de><input type="submit" value="設定"></td>
+</tr>
+</form>
+
+<!-------------------------------------------------------------------------------------- -->
+<form method="POST" action="/cgi-bin/forcectl.cgi">
+<tr>
+  <td bgcolor=d1d8de align=right><strong>土中温度</strong></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c><strong><%= temp2interval %></strong></font></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c size=2><strong><%= mode3status %></strong></font></td>
+<td bgcolor=lightyellow align="right"><font color=#354a5c size=2><strong><%= actudict[int('000' + temp2actu)] %></strong></font></td>
+<td bgcolor=lightyellow align="center"><font color=blue size=2><strong><%= status3flag %></strong></font></td>
+<td bgcolor=#94ca7a align=center>
+
+
+<table border=0>
+<tr><td>
+<select name=action>
+<option value=start>開始</option>
+<option value=stop>停止</option>
+<option value=auto>自動</option>
+<input type="hidden" name="sensorid" value="temp2">
+</select>
+</td>
+<td>
+<input type="submit" value="実行">
+</form>
+</td></tr>
+</table>
+
+</td>
+  
+<form method="POST" action="/cgi-bin/setvalues.cgi">
+<td bgcolor=d1d8de><div id='slider3'></td><td bgcolor=d1d8de><input type="text" name="slide3" value="" id="num3" size=4" />
+
+<select name="temp2mode">
+<option value="1111">以上</option>
+<option value="2222">以下</option>
+</select>
+
+</td><td bgcolor=d1d8de align=center>
+
+<select name="temp2actu">
+<option value="設定しない">設定しない</option>
+<%
+for row in actu:
+%>
+<option value= <%= row.encode('utf-8') %>><%= row.encode('utf-8') %> </option>
+<%
+%>
+</select>
+</td>
+<input type="hidden" name="sensorid" value="temp2">
+
+ <td bgcolor=#d1d8de><input type="submit" value="設定"></td>
+</tr>
+</form>
+
+<!-------------------------------------------------------------------------------------- -->
+<form method="POST" action="/cgi-bin/forcectl.cgi">
+<tr>
+  <td bgcolor=d1d8de align=right><strong>湿度</strong></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c><strong><%= humedinterval %></strong></font></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c size=2><strong><%= mode4status %></strong></font></td>
+<td bgcolor=lightyellow align="right"><font color=#354a5c size=2><strong><%= actudict[int('000' + humedactu)] %></strong></font></td>
+<td bgcolor=lightyellow align="center"><font color=blue size=2><strong><%= status4flag %></strong></font></td>
+<td bgcolor=#94ca7a align=center>
+
+<table border=0>
+<tr><td>
+<select name=action>
+<option value=start>開始</option>
+<option value=stop>停止</option>
+<option value=auto>自動</option>
+<input type="hidden" name="sensorid" value="humed">
+</select>
+</td>
+<td>
+<input type="submit" value="実行">
+</form>
+</td></tr>
+</table>
+
+</td>
+
+<form method="POST" action="/cgi-bin/setvalues.cgi">
+  <td bgcolor=d1d8de><div id='slider4'></td><td bgcolor=d1d8de><input type="text" name="slide4" value="" id="num4" size=4" />
+
+<select name="humedmode">
+<option value="1111">以上</option>
+<option value="2222">以下</option>
+</select>
+
+</td><td bgcolor=d1d8de align=center>
+
+<select name="humedactu">
+<option value="設定しない">設定しない</option>
+<%
+for row in actu:
+%>
+<option value= <%= row.encode('utf-8') %>><%= row.encode('utf-8') %> </option>
+<%
+%>
+</select>
+</td>
+<input type="hidden" name="sensorid" value="humed">
+
+ <td bgcolor=#d1d8de><input type="submit" value="設定"></td>
+</tr>
+</form>
+
+<!-------------------------------------------------------------------------------------- -->
+<form method="POST" action="/cgi-bin/forcectl.cgi">
+<tr>
+<td bgcolor=d1d8de align=right><strong>光度</strong></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c><strong><%= lightinterval %></strong></font></td>
+<td bgcolor=lightyellow  align="right"><font color=#354a5c size=2><strong><%= mode5status %></strong></font></td>
+<td bgcolor=lightyellow align="right"><font color=#354a5c size=2><strong><%= actudict[int('000' + lightactu)] %></strong></font></td>
+<td bgcolor=lightyellow align="center"><font color=blue size=2><strong><%= status5flag %></strong></font></td>
+<td bgcolor=#94ca7a align=center>
+
+<table border=0>
+<tr><td>
+<select name=action>
+<option value=start>開始</option>
+<option value=stop>停止</option>
+<option value=auto>自動</option>
+<input type="hidden" name="sensorid" value="light">
+</select>
+</td>
+<td>
+<input type="submit" value="実行">
+</form>
+</td></tr>
+</table>
+
+</td>
+
+<form method="POST" action="/cgi-bin/setvalues.cgi">
+<td bgcolor=d1d8de><div id='slider5'></td><td bgcolor=d1d8de><input type="text" name="slide5" value="" id="num5" size=4" />
+
+<select name="lightdmode">
+<option value="1111">以上</option>
+<option value="2222">以下</option>
+</select>
+
+</td><td bgcolor=d1d8de align=center>
+<select name="lightactu">
+<option value="設定しない">設定しない</option>
+<%
+for row in actu:
+%>
+<option value= <%= row.encode('utf-8') %>><%= row.encode('utf-8') %> </option>
+<%
+%>
+</select>
+</td>
+<input type="hidden" name="sensorid" value="light">
+
+ <td bgcolor=#d1d8de><input type="submit" value="設定"></td>
+</tr>
+</form>
+
+</table>
+<p>
+<center>
+<form method="POST" action="/cgi-bin/persist.cgi">
+<table border=0 cellpadding=3>
+<tr>
+  <td ><input type="submit" value="設定をアクティベートする"></td>
+</form>
+</tr>
+</table>
+<p>
+
+</center>
+</td></tr>
+</table>
+</center>
+
+</html>
