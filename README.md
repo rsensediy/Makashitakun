@@ -31,6 +31,7 @@ Raspberry-Pi/
   
 I have used DHT library for humidity and temperature, you might end up with using other stuff.
 
-<a href="http://rsensesystems.com/rsensediy" target=_blank>http://rsensesystems.com/rsensediy</a>
+<a href="http://www.instructables.com/id/Automated-vegetable-cultivation-system/" target=_blank>Instructables</a>
+<a href="http://rsensesystems.com/rsensediy" target=_blank>rSense DIY</a>
 </pre>
 
